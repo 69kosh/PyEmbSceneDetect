@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def _calcCostsSquare(distances: np.array, offset: int = 0, windowSize: int = 1024) -> tuple[np.array, np.array]:
+def _calcCostsSquare(distances: np.array, offset: int = 0) -> tuple[np.array, np.array]:
     '''По матрице дистанций для одного кадра, всех размеров сцен считаем суммарные веса и площади
         Средняя стоимость, используемая дальше, это суммарная дистанция поделеная на площадь
 
@@ -12,7 +12,8 @@ def _calcCostsSquare(distances: np.array, offset: int = 0, windowSize: int = 102
         соответственно всегда нулевая дистанция и единичная площадь
 
     '''
-    length = len(distances)
+    length = distances.shape[0]
+    windowSize = distances.shape[1]
     sums = np.zeros(shape=[windowSize], dtype=np.float32)
 
     sum = 0.0
@@ -41,18 +42,19 @@ def _calcCostsSquare(distances: np.array, offset: int = 0, windowSize: int = 102
     return (sums, areas)
 
 
-def calcCostsSquare(distances: np.array, windowSize: int = 1024) -> tuple[np.array, np.array]:
+def calcCostsSquare(distances: np.array) -> tuple[np.array, np.array]:
     '''считаем суммы дистанций и площади 
         для каждого кадра как начального, и для каждой длины сцены до размера окна
 
     '''
-    length = len(distances)
+    length = distances.shape[0]
+    windowSize = distances.shape[1]
     sums = np.zeros(shape=[length, windowSize], dtype=np.float32)
     areas = np.zeros(shape=[length, windowSize], dtype=np.float32)
 
     for i, v in enumerate(distances):
         # цена - суммарна дистанции деленная на площадь
         (sums[i], areas[i]) = _calcCostsSquare(
-            distances=distances, offset=i, windowSize=windowSize)
+            distances=distances, offset=i)
 
     return (sums, areas)

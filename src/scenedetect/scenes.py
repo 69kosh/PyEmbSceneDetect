@@ -2,7 +2,7 @@ from collections import namedtuple
 import numpy as np
 
 
-def calcScenes(distances: np.array, areas: np.array, windowSize=1024) -> tuple[dict, np.array]:
+def calcScenes(distances: np.array, areas: np.array) -> tuple[dict, np.array]:
     '''
         попробую пойти снизу - сначала будет сцен столько сколько кадров
         итеративно, по минимальной стоимости объединения 
@@ -18,7 +18,8 @@ def calcScenes(distances: np.array, areas: np.array, windowSize=1024) -> tuple[d
     Scene = namedtuple('Scene', ['b', 'e'])
     BiScene = namedtuple('BiScene', ['c', 's1', 's2'])
 
-    length = len(distances)
+    length = distances.shape[0]
+    windowSize = distances.shape[1]
 
     beginScenes = dict[int, Scene]()
     endScenes = dict[int, Scene]()
