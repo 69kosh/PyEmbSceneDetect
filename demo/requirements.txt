@@ -3,3 +3,4 @@ scipy
 ffmpeg-python
 cv2
 matplotlib
+tensorflow

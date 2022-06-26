@@ -88,3 +88,29 @@ def calcDistancesWindowed(vectors: np.array, windowSize=1024, distanceFunc=_calc
             distances[i, secondBeginDst: secondEndDst] = distance[secondBeginSrc: secondEndSrc]
 
     return distances
+
+
+def calcDistancesWindowedShifted(vectors: np.array, windowSize=1024, distanceFunc=_calcRowDistances) -> np.array:
+    """Вычисляем матрицу дистанций, ограниченную окном, диагональ смещена к началу оси
+    
+    """
+
+    length = len(vectors)
+
+    distances = np.zeros(shape=[length, windowSize], dtype=np.float32)
+
+    for i, v in enumerate(vectors):
+
+        border = min(length, i + windowSize)
+        distance = distanceFunc(vectors[i: border], v)  # от 0 до size
+
+        distances[i, 0: border - i] = distance
+
+    return distances
+
+
+def normalizeDistances(distances:np.array) -> np.array:
+
+    distances /= np.max(np.abs(distances))
+
+    return distances

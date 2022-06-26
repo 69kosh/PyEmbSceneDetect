@@ -14,10 +14,15 @@ def prepareGeneratorFromVideo(filename: str, shape: tuple[int, int] = (160, 160)
         .run_async(pipe_stdout=True)
     )
 
+    i = 0
     while True:
         in_bytes = process.stdout.read(shape[0] * shape[1] * 3)
         if not in_bytes:
             break
+
+        i += 1
+        if ((i - 1) % every) != 0:
+            continue
 
         image = np.frombuffer(in_bytes, np.uint8).reshape(
             [shape[0], shape[1], 3])
@@ -27,19 +32,19 @@ def prepareGeneratorFromVideo(filename: str, shape: tuple[int, int] = (160, 160)
         yield image
 
 
-def generateDemoVideo(inputFilename: str, outputFilename: str, scenes: list):
+def generateDemoVideo(inputFilename: str, outputFilename: str, scenes: list, every = 1):
 
     frames = []
 
     for s, scene in enumerate(scenes):
-        for i in range(scene[0], scene[1] + 1):
+        for i in range(scene[0] * every, (scene[1] + 1) * every):
             frames.append((s, scene))
 
     probe = ffmpeg.probe(inputFilename)
     video_stream = next(
         (stream for stream in probe['streams'] if stream['codec_type'] == 'video'), None)
-    width = int(video_stream['width']) // 2
-    height = int(video_stream['height']) // 2
+    width = int(video_stream['width']) #// 2
+    height = int(video_stream['height']) #// 2
 
     # print(width, height)
     # return
@@ -80,15 +85,15 @@ def generateDemoVideo(inputFilename: str, outputFilename: str, scenes: list):
         thickness = 2
         lineType = 2
 
-        cv2.putText(in_frame, 'scene {s:03d}: {i:06d} -> {n:06d}'.format(s=s + 1, i=i + 1, n=e + 1),
+        cv2.putText(in_frame, 'scene {s:03d}: {i:06d} -> {n:06d}'.format(s=s + 1, i=i + 1, n=e * every + 1),
                     bottomLeftCornerOfText,
                     font,
                     fontScale,
                     fontColor,
                     thickness,
                     lineType)
-        # See examples/tensorflow_stream.py:
-        out_frame = in_frame  # deep_dream.process_frame(in_frame)
+
+        out_frame = in_frame 
 
         i += 1
 

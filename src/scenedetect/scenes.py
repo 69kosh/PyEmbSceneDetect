@@ -13,6 +13,8 @@ def calcScenes(distances: np.array, areas: np.array) -> tuple[dict, np.array]:
         сортируемого по цене объединения списка. обновляем эти списки при каждом слиянии
         помимо удаления влитого, обновления расширенного, еще пересчитываем обновления 
         с соседями
+
+        TODO: нужно оптимизировать, очень прожорливый по памяти, долго выполняется
     '''
 
     Scene = namedtuple('Scene', ['b', 'e'])
@@ -158,7 +160,8 @@ def calcScenes(distances: np.array, areas: np.array) -> tuple[dict, np.array]:
         for tuple in sorted(beginScenes.items()):
             tempScenes.append((tuple[1].b, tuple[1].e))
 
-        allScenes[scenesLen] = tempScenes
+        if fullCost > 0.001 or scenesLen < length // 10:
+            allScenes[scenesLen] = tempScenes
 
     return (allScenes, costHistory)
 

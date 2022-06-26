@@ -8,3 +8,5 @@ def generateImage(array:np.array, filename:str):
     a = np.expand_dims(a.astype(np.uint8), axis = 2)
     a = np.concatenate((a, a, a), axis = 2)
     cv2.imwrite(filename, a)
+
+

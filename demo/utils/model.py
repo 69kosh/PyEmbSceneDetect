@@ -44,6 +44,7 @@ def calcVectors(model: tf.keras.Model, generator) -> np.array:
 def normalizeVectors(vectors: np.array) -> np.array:
 
     vectors = np.array(vectors)
+    # vectors /= np.max(np.abs(vectors), axis=0)
     vectors /= np.linalg.norm(vectors, axis=0)
 
     return vectors
