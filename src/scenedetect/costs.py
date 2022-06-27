@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def _calcCostsSquare(distances: np.array, offset: int = 0) -> tuple[np.array, np.array]:
     '''Вычисляем стоимость всех размеров сцены (от 0 до размера окна) 
         для конкретного начального кадра.
@@ -28,13 +29,11 @@ def _calcCostsSquare(distances: np.array, offset: int = 0) -> tuple[np.array, np
 
         # на каждый шаг добавляем к сумме
         # удвоенную сумму колонки (за диагональю, в конце квадрата)
-        sum += np.sum(distances[offset: offset2 -
-                        1, offset2 % windowSize]) * 2
-        area += (offset2 - 1 - offset) * 2 + 1
+        sum += np.sum(distances[offset: offset2, offset2 % windowSize]) * 2
+        area += (offset2 - offset) * 2 + 1
 
         sums[size] = sum
         areas[size] = area
-
 
     return (sums, areas)
 
@@ -57,8 +56,8 @@ def calcCostsSquare(distances: np.array) -> tuple[np.array, np.array]:
     return (sums, areas)
 
 
-def _calcCostsHex(distances: np.array, distancesShifted: np.array, offset: int = 0, 
-                    minSplit:int = 8, maxSplit:int = 64, splitRate:float = 0.5) -> tuple[np.array, np.array]:
+def _calcCostsHex(distances: np.array, distancesShifted: np.array, offset: int = 0,
+                  minSplit: int = 8, maxSplit: int = 64, splitRate: float = 0.5) -> tuple[np.array, np.array]:
     '''Вычисляем стоимости всех размеров сцены (от 0 до размера окна) 
         для конкретного начального кадра.
 
@@ -117,7 +116,7 @@ def _calcCostsHex(distances: np.array, distancesShifted: np.array, offset: int =
               .+
                .
                 .
-        
+
         '''
 
         # это диагональные координаты выбираемой крайней колонки как по горизонту, так и по вертикали
@@ -129,7 +128,7 @@ def _calcCostsHex(distances: np.array, distancesShifted: np.array, offset: int =
 
         delta = abs(splitSize - oldSplitSize)
         oldSplitSize = splitSize
-        
+
         # координата верхней границы колонки
         topOffset = offset2 - min(size, splitSize)
 
@@ -143,7 +142,8 @@ def _calcCostsHex(distances: np.array, distancesShifted: np.array, offset: int =
 
         # если дельта не нулевая - берём новую диагональную разделительную колонку
         if delta > 0:
-            sum += np.sum(distancesShifted[offset: offset2 - splitSize, splitSize]) * 2
+            sum += np.sum(distancesShifted[offset: offset2 -
+                          splitSize, splitSize]) * 2
             area += (offset2 - splitSize - offset) * 2
 
         sums[size] = sum
@@ -153,8 +153,11 @@ def _calcCostsHex(distances: np.array, distancesShifted: np.array, offset: int =
     return (sums, areas)
 
 
-
-def calcCostsHex(distances: np.array, distancesShifted:np.array) -> tuple[np.array, np.array]:
+def calcCostsHex(distances: np.array,
+                 distancesShifted: np.array,
+                 minSplit: int = 8,
+                 maxSplit: int = 64,
+                 splitRate: float = 0.5) -> tuple[np.array, np.array]:
     '''считаем суммы дистанций и площади 
         для каждого кадра как начального, и для каждой длины сцены до размера окна
         используем шестигранную область
@@ -167,8 +170,11 @@ def calcCostsHex(distances: np.array, distancesShifted:np.array) -> tuple[np.arr
     for i, v in enumerate(distances):
         # цена - суммарна дистанции деленная на площадь
         (sums[i], areas[i]) = _calcCostsHex(
-            distances=distances, 
-            distancesShifted=distancesShifted, 
-            offset=i)
+            distances=distances,
+            distancesShifted=distancesShifted,
+            offset=i,
+            minSplit=minSplit,
+            maxSplit=maxSplit,
+            splitRate=splitRate)
 
     return (sums, areas)
