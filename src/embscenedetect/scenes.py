@@ -173,3 +173,19 @@ def chooseScenesProportion(allScenes: dict, allCosts: np.array, part=0.5) -> lis
         costHistorySum += cost
         if costHistorySum > costHistoryProportionSum:
             return allScenes[i]
+
+
+def chooseScenesElbow(allScenes: dict, allCosts: np.array, rate=2) -> list:
+
+    maxLenScenes = len(allCosts)
+
+    maxCost = max(allCosts)
+    costsFixed = [allCosts[j] + (j / maxLenScenes)*maxCost*rate for j in range(maxLenScenes)]
+
+    minCost = 100500
+    minScenes = []
+    for i, cost in enumerate(costsFixed):
+        if minCost > cost and i in allScenes:
+            minScenes = allScenes[i]            
+            minCost = cost
+    return minScenes
