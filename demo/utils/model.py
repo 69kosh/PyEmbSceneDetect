@@ -11,13 +11,16 @@ def prepareModel(modelFilename=None, shape=(160, 160)):
         для демонстрации достаточно будет безголовой претрейненой модели
         вектор конечно же великоват
     '''
-    base = tf.keras.applications.MobileNetV3Large(include_top=True, minimalistic=False,
-                                                  weights='imagenet', alpha=1.0, input_shape=(shape[0], shape[1], 3))
+    base = tf.keras.applications.MobileNetV2(include_top=True, weights='imagenet', 
+                                    alpha=1.0, input_shape=(shape[0], shape[1], 3))
 
-    out = base.get_layer('multiply_20').output
-    out = tf.keras.layers.Flatten()(out)
+    # base.summary()
+
+    out = base.get_layer('global_average_pooling2d').output
 
     model = tf.keras.Model(inputs=base.input, outputs=out)
+
+    model.summary()
 
     return model
 
@@ -26,7 +29,7 @@ def calcVectors(model: tf.keras.Model, generator) -> np.array:
 
     vectors = []
     batch = []
-    batchSize = 32
+    batchSize = 64
     for image in generator:
         batch.append(image)
         if batchSize == len(batch):
@@ -48,3 +51,4 @@ def normalizeVectors(vectors: np.array) -> np.array:
     vectors /= np.linalg.norm(vectors, axis=0)
 
     return vectors
+    
