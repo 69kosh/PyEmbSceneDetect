@@ -57,7 +57,7 @@ def calcCostsSquare(distances: np.array) -> tuple[np.array, np.array]:
 
 
 def _calcCostsHex(distances: np.array, distancesShifted: np.array, offset: int = 0,
-                  minSplit: int = 8, maxSplit: int = 64, splitRate: float = 0.5) -> tuple[np.array, np.array]:
+                  minSplit: int = 8, maxSplit: int = 64, splitRate: float = 0.5, fullArea = False) -> tuple[np.array, np.array]:
     '''Вычисляем стоимости всех размеров сцены (от 0 до размера окна) 
         для конкретного начального кадра.
 
@@ -90,6 +90,8 @@ def _calcCostsHex(distances: np.array, distancesShifted: np.array, offset: int =
         Для итеративного подсчета шестигранной дистанции используем 
         прямую матрицу дистанций для передней границы, 
         и сдвинутую матрицу для диагональной границы
+
+        UPD: пробую площадь брать полного квадрата
 
     '''
     length = distances.shape[0]
@@ -144,7 +146,11 @@ def _calcCostsHex(distances: np.array, distancesShifted: np.array, offset: int =
         if delta > 0:
             sum += np.sum(distancesShifted[offset: offset2 -
                           splitSize, splitSize]) * 2
-            area += (offset2 - splitSize - offset) * 2
+
+            if fullArea:
+                area += (offset2 - offset) * 2 + 1
+            else:
+                area += (offset2 - splitSize - offset) * 2
 
         sums[size] = sum
 
@@ -157,7 +163,8 @@ def calcCostsHex(distances: np.array,
                  distancesShifted: np.array,
                  minSplit: int = 8,
                  maxSplit: int = 64,
-                 splitRate: float = 0.5) -> tuple[np.array, np.array]:
+                 splitRate: float = 0.5,
+                 fullArea = False) -> tuple[np.array, np.array]:
     '''считаем суммы дистанций и площади 
         для каждого кадра как начального, и для каждой длины сцены до размера окна
         используем шестигранную область
@@ -175,6 +182,7 @@ def calcCostsHex(distances: np.array,
             offset=i,
             minSplit=minSplit,
             maxSplit=maxSplit,
-            splitRate=splitRate)
+            splitRate=splitRate,
+            fullArea=fullArea)
 
     return (sums, areas)
